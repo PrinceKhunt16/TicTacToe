@@ -4,8 +4,7 @@ import Gameover from "../assets/music/gameover.mp3"
 
 export default function TicTacToePlayGround() {
   const cross = new Audio(Cross)
-  const gameover = new Audio(Gameover)
-  const [board] = useState([])
+  const [board, setBoard] = useState([])
   const [who, setWho] = useState(0)
   const [winTypes] = useState([
     [0, 1, 2],
@@ -18,44 +17,24 @@ export default function TicTacToePlayGround() {
     [2, 4, 6]
   ])
 
-  function checkWin() {
-    for(let i = 0; i < winTypes.length; i++){
-      if(board.at(winTypes[i][0]).check === 1 && board.at(winTypes[i][1]).check === 1 && board.at(winTypes[i][2]).check === 1){
-        if((board.at(winTypes[i][0]).who === 0 && board.at(winTypes[i][1]).who === 0 && board.at(winTypes[i][2]).who === 0 ) || 
-          (board.at(winTypes[i][0]).who === 1 && board.at(winTypes[i][1]).who === 1 && board.at(winTypes[i][2]).who === 1)){
-          gameover.play()
-          for(let j = 0; j < winTypes[i].length; j++){
-            const e = document.getElementsByClassName(winTypes[i][j])
-            e[0].classList?.add('win')
-          }
-
-          for(let j = 0; j < 9; j++){
-            const e = document.getElementsByClassName(j)
-            if(e[0].classList?.contains('win')){
-              continue
-            } else {
-              e[0].classList?.add('loss')
-              board.at(j).check = 1
-            }
-          }
-
-          return true
-        }
-      }
-    }
-
-    return false
-  }
-
   function updateBoard(id) {
-    board.at(id).check = 1
-    board.at(id).who = who
-
-    checkWin()
+    const newBoard = board.map((obj) => {
+      if(obj.id === id){
+        return {
+          ...obj,
+          check: 1,
+          who: who
+        }
+      } else {
+        return obj
+      }
+    })
+    
+    setBoard(newBoard)
   }
 
   function handleOnClick(id) {
-    if(board.at(id).check === 0){
+    if(board[id]?.check === 0){
       const e = document.getElementsByClassName(id)
     
       e[0].classList.forEach((c) => {
@@ -73,22 +52,20 @@ export default function TicTacToePlayGround() {
         e[0].classList?.add('check')
       }
 
-      const isWin = updateBoard(id)      
+      updateBoard(id)
 
-      if(!isWin){
-        if(who){
-          cross.play()
-          setWho(0)
-        } else {
-          cross.play()
-          setWho(1)
-        }
+      if(who){
+        cross.play()
+        setWho(0)
+      } else {
+        cross.play()
+        setWho(1)
       }
     }
   }
 
   function handleMouseEnter(id) {
-    if(board.at(id).check === 0){
+    if(board[id]?.check === 0){
       const e = document.getElementsByClassName(id)
       
       if(who === 0){
@@ -100,7 +77,7 @@ export default function TicTacToePlayGround() {
   }
  
   function handleMouseLeave(id) {
-    if(board.at(id).check === 0){
+    if(board[id].check === 0){
       const e = document.getElementsByClassName(id)
   
       if(e[0].classList.contains('hover-cross')){
@@ -112,16 +89,53 @@ export default function TicTacToePlayGround() {
   }
 
   useEffect(() => {
-    let n = 9, i = 0;
+    const gameover = new Audio(Gameover)
+
+    function checkWin() {
+      for(let i = 0; i < winTypes.length; i++){
+        if(board[winTypes[i][0]]?.check === 1 && board[winTypes[i][1]]?.check === 1 && board[winTypes[i][2]]?.check === 1){
+          if((board[winTypes[i][0]]?.who === 0 && board[winTypes[i][1]]?.who === 0 && board[winTypes[i][2]]?.who === 0 ) || 
+            (board[winTypes[i][0]]?.who === 1 && board[winTypes[i][1]]?.who === 1 && board[winTypes[i][2]]?.who === 1)){
+            gameover.play()
+            for(let j = 0; j < winTypes[i].length; j++){
+              const e = document.getElementsByClassName(winTypes[i][j])
+              e[0].classList?.add('win')
+            }
+  
+            for(let j = 0; j < 9; j++){
+              const e = document.getElementsByClassName(j)
+              if(e[0].classList?.contains('win')){
+                continue
+              } else {
+                e[0].classList?.add('loss')
+                board[j].check = 1
+              }
+            }
+  
+            return true
+          }
+        }
+      }
+  
+      return false
+    }
+
+    checkWin()
+  }, [board, winTypes])
+ 
+  useEffect(() => {
+    let temp = [], n = 9, i = 0;
 
     while(n--){
-      board.push({
+      temp.push({
         id: i++,
         check: 0,
         who: -1
       })
     }
-  }, [board])
+
+    setBoard(temp)
+  }, [])
 
   return (
     <div className='body'>
