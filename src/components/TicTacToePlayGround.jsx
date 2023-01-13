@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Cross from "../assets/music/cross.mp3" 
 import Gameover from "../assets/music/gameover.mp3" 
 
@@ -16,22 +16,6 @@ export default function TicTacToePlayGround() {
     [0, 4, 8],
     [2, 4, 6]
   ])
-
-  function updateBoard(id) {
-    const newBoard = board.map((obj) => {
-      if(obj.id === id){
-        return {
-          ...obj,
-          check: 1,
-          who: who
-        }
-      } else {
-        return obj
-      }
-    })
-    
-    setBoard(newBoard)
-  }
 
   function handleOnClick(id) {
     if(board[id]?.check === 0){
@@ -77,7 +61,7 @@ export default function TicTacToePlayGround() {
   }
  
   function handleMouseLeave(id) {
-    if(board[id].check === 0){
+    if(board[id]?.check === 0){
       const e = document.getElementsByClassName(id)
   
       if(e[0].classList.contains('hover-cross')){
@@ -88,41 +72,116 @@ export default function TicTacToePlayGround() {
     }
   }
 
-  useEffect(() => {
-    const gameover = new Audio(Gameover)
+  const updateBoard = useCallback((id) => {
+    const newBoard = board.map((obj) => {
+      if(obj.id === id){
+        return {
+          ...obj,
+          check: 1,
+          who: who
+        }
+      } else {
+        return obj
+      }
+    })
+    
+    setBoard(newBoard)
+  }, [board, who])
 
-    function checkWin() {
-      for(let i = 0; i < winTypes.length; i++){
-        if(board[winTypes[i][0]]?.check === 1 && board[winTypes[i][1]]?.check === 1 && board[winTypes[i][2]]?.check === 1){
-          if((board[winTypes[i][0]]?.who === 0 && board[winTypes[i][1]]?.who === 0 && board[winTypes[i][2]]?.who === 0 ) || 
-            (board[winTypes[i][0]]?.who === 1 && board[winTypes[i][1]]?.who === 1 && board[winTypes[i][2]]?.who === 1)){
-            gameover.play()
-            for(let j = 0; j < winTypes[i].length; j++){
-              const e = document.getElementsByClassName(winTypes[i][j])
-              e[0].classList?.add('win')
-            }
-  
-            for(let j = 0; j < 9; j++){
-              const e = document.getElementsByClassName(j)
-              if(e[0].classList?.contains('win')){
-                continue
-              } else {
-                e[0].classList?.add('loss')
-                board[j].check = 1
-              }
-            }
-  
-            return true
-          }
+  const gameReload = useCallback(() => {
+    setTimeout(() => {
+      let temp = [], n = 9, i = 0;
+
+      while(n--){
+        temp.push({
+          id: i++,
+          check: 0,
+          who: -1
+        })
+      }
+
+      setBoard(temp)
+
+      for(let i = 0; i < 9; i++){
+        const e = document.getElementsByClassName(i)
+        
+        if(e[0].classList?.contains('win')){
+          e[0].classList?.remove('win')
+        } else {
+          e[0].classList?.remove('loss')
+        }
+
+        if(e[0].classList?.contains('cross')){
+          e[0].classList?.remove('cross')
+        } else {
+          e[0].classList?.remove('check')
         }
       }
+    }, 3000)
+  }, [])
+
+  useEffect(() => {
+    let random, e
+
+    if(who === 1){
+      while(true){
+        random = 1 + Math.round(1 + (8 - 1) * Math.random())
+        e = document.getElementsByClassName(random)
+        
+        if(!(e[0]?.classList?.contains('cross') || e[0]?.classList?.contains('check'))){
+          e[0]?.classList?.add('check')
+          setWho(0)
+          updateBoard(random)
+          break
+        }
+      }
+     }
+  }, [who, updateBoard])
+
+  useEffect(() => {
+    const gameover = new Audio(Gameover)
+    let check
+
+    function checkWin() {
+      check = 0
+
+      for(let i = 0; i < winTypes.length; i++){
+        if((board[winTypes[i][0]]?.who === 0 && board[winTypes[i][1]]?.who === 0 && board[winTypes[i][2]]?.who === 0) || 
+          (board[winTypes[i][0]]?.who === 1 && board[winTypes[i][1]]?.who === 1 && board[winTypes[i][2]]?.who === 1)){
+          gameover.play()
+          
+          for(let j = 0; j < winTypes[i].length; j++){
+            const e = document.getElementsByClassName(winTypes[i][j])
+            e[0].classList?.add('win')
+          }
   
-      return false
+          for(let j = 0; j < 9; j++){
+            const e = document.getElementsByClassName(j)
+            if(e[0].classList?.contains('win')){
+              continue
+            } else {
+              e[0].classList?.add('loss')
+            }
+          }     
+            
+          gameReload()
+        }
+      }
+
+      for(let i = 0; i < 9; i++){
+        if(board[i]?.check){
+          check++
+        }
+      }
+
+      if(check === 9){
+        gameReload()
+      }
     }
 
     checkWin()
-  }, [board, winTypes])
- 
+  }, [board, winTypes, gameReload])
+
   useEffect(() => {
     let temp = [], n = 9, i = 0;
 
