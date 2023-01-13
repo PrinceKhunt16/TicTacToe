@@ -7,3 +7,76 @@
   padding: 0;
   font-family: 'Roboto';
 }
+
+.body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f8ff;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.board div {
+  height: 150px;
+  width: 150px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  background-color: #e4ecff;
+}
+
+.br {
+  border-right: 1px solid #f0f8ff;;
+}
+
+.bl {
+  border-left: 1px solid #f0f8ff;
+}
+
+.bt {
+  border-top: 1px solid #f0f8ff;
+}
+
+.bb {
+  border-bottom: 1px solid #f0f8ff;
+}
+
+.cross {
+  background: url('./assets/image/cross.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.hover-cross {
+  background: url('./assets/image/hover-cross.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.check {
+  background: url('./assets/image/check.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.hover-check {
+  background: url('./assets/image/hover-check.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.win {
+  background-color: #145A32 !important;
+}
+
+.loss {
+  background-color: #78281F !important;
+}
